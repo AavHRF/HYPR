@@ -129,9 +129,24 @@ class Client:
                     "ratelimit": r.headers["X-Ratelimit-requests-seen"],
                 }
 
+            # edge cases for World Assembly API
             if "verify" in params.values():
                 # This endpoint returns nation verification information
                 return {
                     "verified": True if int(r.text) == 1 else False,
+                    "ratelimit": r.headers["X-Ratelimit-requests-seen"],
+                }
+
+            if "delegates" in params.values():
+                # This is a single tag with a list of CSV formatted nations
+                return {
+                    "delegates": root.find("DELEGATES").text.split(","),
+                    "ratelimit": r.headers["X-Ratelimit-requests-seen"],
+                }
+
+            if "members" in params.values():
+                # This is a single tag with a list of CSV formatted nations
+                return {
+                    "members": root.find("MEMBERS").text.split(","),
                     "ratelimit": r.headers["X-Ratelimit-requests-seen"],
                 }
