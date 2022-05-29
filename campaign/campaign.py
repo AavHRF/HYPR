@@ -1,7 +1,6 @@
 import time
 import api.wrapper
 import re
-from typing import Callable
 from collections import deque
 
 
@@ -205,6 +204,8 @@ class Ejections(Campaign):
         for event in events:
             nations.append(re.search(r'[\w-]+(?=@@ was)', event['text']).group(0))
 
+        return nations
+
 
 class Exits(Campaign):
     """
@@ -373,7 +374,7 @@ class WorldAssemblyDelegates(Campaign):
         return client.ns_request(params={'wa': '1', 'q': 'delegates'})['delegates']
 
 
-class WorldAssemblyDelegates(Campaign):
+class WorldAssemblyMembers(Campaign):
     """
     Targets all World Assembly members
     """
