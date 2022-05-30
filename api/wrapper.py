@@ -25,6 +25,27 @@ class Client:
         self._headers = value
 
     def __init__(self, useragent: str):
+        """
+        API Client constructor
+
+        Functions of the API client:
+        ns_request - Makes a request to the NationStates API, and parses the response from XML to JSON
+
+        Properties of the class:
+        requests_made - The number of requests made to the API
+        headers - The headers to send with each request
+
+        Both of the above have setters, so they can be modified mid-run should that become necessary.
+
+        requests_made is incremented for each request made, and is reset to 0 when the ratelimit period
+        rolls over. This is to compensate for the happenings endpoint being clunky to attach X-Ratelimit-requests-seen
+        to on return due to its complicated structure. Every other endpoint returns a X-Ratelimit-requests-seen value
+        in addition to the rest of its data, however, which does make this somewhat redundant. Could definitely use
+        some work to hopefully remove this, but it's low-priority for now. If you're reading this and aren't a maintainer,
+        but it bugs you, PR a change! We're open source for a reason!
+
+        :param useragent: An identifying string for the client
+        """
         self._headers = {"User-Agent": useragent}
         self._requests_made = 0
 

@@ -4,6 +4,7 @@ from webbrowser import open as open_url
 from api import Client
 from tools import cout, menu, clear
 from time import sleep
+from typing import Tuple
 
 
 def load_config() -> dict:
@@ -30,7 +31,16 @@ def load_config() -> dict:
         raise FileNotFoundError
 
 
-def verify_prompt():
+def verify_prompt() -> Tuple[str, str]:
+    """
+    Spawns a verification prompt to confirm the user's identity
+    Returns the nation and the token that they input
+    This function serves two purposes:
+    1: to ensure API compliance
+    2: to reduce boilerplate code by providing a single function to handle the prompt
+    instead of multiple prompt copy-pastes.
+    :return: tuple(str, str)
+    """
     cout("HYPR requires that you verify your identity before continuing.", "info")
     nt = input(
         "Please enter your nation. Do not include the pretitle (e.g. 'The Republic of'): "
@@ -45,7 +55,7 @@ def verify_prompt():
 
 
 if __name__ == "__main__":
-    init()  # Never remove this line. It initializes colorama.
+    init() # Colorama init, don't remove or stuff Will Break™
     cout("HYPR is starting up...", "info")
     cout("Loading config...", "debug")
 

@@ -22,15 +22,15 @@ class Campaign:
         :param args: Arguments to pass to search function
         :param reverse: Run campaign in first-in-first-out order instead of first-in-last-out.
         """
-        self.name = name
-        self.priority = priority
-        self.tgid = tgid
+        self._name = name
+        self._priority = priority
+        self._tgid = tgid
         self.search = search
         self.args = args
         self.reverse = reverse
 
         self.deque = deque()
-        self.last_search = 0
+        self._last_search = 0
 
     def update_deque(self) -> None:
         """
@@ -40,7 +40,7 @@ class Campaign:
         """
         # generate list of new nations
         new_nations = self.search(*self.args)
-        self.last_search = time.time()
+        self._last_search = time.time()
 
         # add items to deque - oldest at left, newest at right
         for nation in new_nations:
@@ -56,6 +56,7 @@ class Campaign:
         self.deque.clear()
         self.update_deque()
 
+    @property
     def nation(self) -> str:
         """
         Return next nation to be telegrammed and remove from deque.
@@ -69,6 +70,7 @@ class Campaign:
         else:
             return self.deque.pop()[0]
 
+    @property
     def tgid(self) -> int:
         """
         Return TGID for campaign.
@@ -76,8 +78,9 @@ class Campaign:
         :return: tgid
         """
 
-        return self.tgid
+        return self._tgid
 
+    @property
     def priority(self) -> int:
         """
         Return campaign priority
@@ -85,20 +88,22 @@ class Campaign:
         :return: priority
         """
 
-        return self.priority
+        return self._priority
 
+    @property
     def name(self) -> str:
         """
         Return campaign name
         :return: name
         """
-        return self.name
+        return self._name
 
+    @property
     def last_search(self) -> int:
         """
         Return time the deque was last updated, in Unix time
         :return: last search time in seconds since epoch
         """
 
-        return self.last_search
+        return self._last_search
 
