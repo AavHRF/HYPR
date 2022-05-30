@@ -16,8 +16,15 @@ from collections import deque
 
 
 class Campaign:
-    def __init__(self, name: str, priority: int, tgid: int, recruitment: bool, handler: api.wrapper.Client,
-                 search_params: dict):
+    def __init__(
+        self,
+        name: str,
+        priority: int,
+        tgid: int,
+        recruitment: bool,
+        handler: api.wrapper.Client,
+        search_params: dict,
+    ):
         """
         :param name: Campaign name
         :param priority: Campaign priority
@@ -45,11 +52,11 @@ class Campaign:
         self.one_time = False
 
         # hook for custom init functionality.
-        self._post_init()
+        self.post_init()
 
-    def _post_init(self) -> None:
+    def post_init(self, *args, **kwargs) -> None:
         """
-        Called by __init__(). Use this to override specific constructor parameters or do other housekeeping.
+        Called by __init__(). Override and pass arguments when custom functionality is needed.
         """
         pass
 
@@ -168,7 +175,7 @@ class NewlyFounded(Campaign):
     """
 
     def _search(self) -> list:
-        return self.handler.ns_request(params={'q': 'newnations'})['newnations']
+        return self.handler.ns_request(params={"q": "newnations"})["newnations"]
 
 
 class Residents(Campaign):
@@ -176,14 +183,15 @@ class Residents(Campaign):
     Targets all residents of a region. Runs once.
     """
 
-    def _post_init(self) -> None:
+    def post_init(self) -> None:
         # no deque limit - regions can be huge
         self.deque = deque()
         self.one_time = True
 
     def _search(self) -> list:
-        return self.handler.ns_request(params={'region': self.search_params['region'], 'q': 'nations'})[
-            'NATIONS'].split(':')
+        return self.handler.ns_request(
+            params={"region": self.search_params["region"], "q": "nations"}
+        )["NATIONS"].split(":")
 
 
 class Ejections(Campaign):
@@ -192,17 +200,23 @@ class Ejections(Campaign):
     """
 
     def _search(self) -> list:
-        region = self.search_params['region']
+        region = self.search_params["region"]
         client = self.handler
 
         if region is None:
-            events = client.ns_request(params={'q': 'happenings', 'filter': 'eject'})
+            events = client.ns_request(params={"q": "happenings", "filter": "eject"})
         else:
-            events = client.ns_request(params={'q': 'happenings', 'filter': 'eject', 'view': f'region.{region}'})
+            events = client.ns_request(
+                params={
+                    "q": "happenings",
+                    "filter": "eject",
+                    "view": f"region.{region}",
+                }
+            )
 
         nations = []
         for event in events:
-            nations.append(re.search(r'[\w-]+(?=@@ was)', event['text']).group(0))
+            nations.append(re.search(r"[\w-]+(?=@@ was)", event["text"]).group(0))
 
         return nations
 
@@ -213,16 +227,18 @@ class Exits(Campaign):
     """
 
     def _search(self) -> list:
-        region = self.search_params['region']
+        region = self.search_params["region"]
         client = self.handler
 
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'move', 'view': f'region.{region}'})
+        events = client.ns_request(
+            params={"q": "happenings", "filter": "move", "view": f"region.{region}"}
+        )
         nations = []
         for event in events:
-            destination = re.search(r'[\w-]+(?=%%\.)', event['text']).group(0)
-            source = re.search(r'[\w-]+(?=%% to)', event['text']).group(0)
+            destination = re.search(r"[\w-]+(?=%%\.)", event["text"]).group(0)
+            source = re.search(r"[\w-]+(?=%% to)", event["text"]).group(0)
             if source == region and destination != "the_rejected_realms":
-                nations.append(re.search(r'[\w-]+(?=@@ relo)', event['text']).group(0))
+                nations.append(re.search(r"[\w-]+(?=@@ relo)", event["text"]).group(0))
 
         return nations
 
@@ -233,16 +249,18 @@ class Entrances(Campaign):
     """
 
     def _search(self) -> list:
-        region = self.search_params['region']
+        region = self.search_params["region"]
         client = self.handler
 
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'move', 'view': f'region.{region}'})
+        events = client.ns_request(
+            params={"q": "happenings", "filter": "move", "view": f"region.{region}"}
+        )
 
         nations = []
         for event in events:
-            destination = re.search(r'[\w-]+(?=%%\.)', event['text']).group(0)
+            destination = re.search(r"[\w-]+(?=%%\.)", event["text"]).group(0)
             if destination == region:
-                nations.append(re.search(r'[\w-]+(?=@@ relo)', event['text']).group(0))
+                nations.append(re.search(r"[\w-]+(?=@@ relo)", event["text"]).group(0))
 
         return nations
 
@@ -253,17 +271,23 @@ class WorldAssemblyAdmissions(Campaign):
     """
 
     def _search(self) -> list:
-        region = self.search_params['region']
+        region = self.search_params["region"]
         client = self.handler
 
         if region is None:
-            events = client.ns_request(params={'q': 'happenings', 'filter': 'member'})
+            events = client.ns_request(params={"q": "happenings", "filter": "member"})
         else:
-            events = client.ns_request(params={'q': 'happenings', 'filter': 'member', 'view': f'region.{region}'})
+            events = client.ns_request(
+                params={
+                    "q": "happenings",
+                    "filter": "member",
+                    "view": f"region.{region}",
+                }
+            )
 
         nations = []
         for event in events:
-            check = re.search(r'[\w-]+(?=@@ was admitted)', event['text'])
+            check = re.search(r"[\w-]+(?=@@ was admitted)", event["text"])
             if check is not None:
                 nations.append(check.group(0))
 
@@ -272,17 +296,23 @@ class WorldAssemblyAdmissions(Campaign):
 
 class WorldAssemblyResignations(Campaign):
     def _search(self) -> list:
-        region = self.search_params['region']
+        region = self.search_params["region"]
         client = self.handler
 
         if region is None:
-            events = client.ns_request(params={'q': 'happenings', 'filter': 'member'})
+            events = client.ns_request(params={"q": "happenings", "filter": "member"})
         else:
-            events = client.ns_request(params={'q': 'happenings', 'filter': 'member', 'view': f'region.{region}'})
+            events = client.ns_request(
+                params={
+                    "q": "happenings",
+                    "filter": "member",
+                    "view": f"region.{region}",
+                }
+            )
 
         nations = []
         for event in events:
-            check = re.search(r'[\w-]+(?=@@ resigned)', event['text'])
+            check = re.search(r"[\w-]+(?=@@ resigned)", event["text"])
             if check is not None:
                 nations.append(check.group(0))
 
@@ -295,19 +325,21 @@ class NewEndorsements(Campaign):
     """
 
     def _search(self) -> list:
-        nation = self.search_params['nation']
-        region = self.search_params['region']
+        nation = self.search_params["nation"]
+        region = self.search_params["region"]
         client = self.handler
 
         if region is None:
-            events = client.ns_request(params={'q': 'happenings', 'filter': 'endo'})
+            events = client.ns_request(params={"q": "happenings", "filter": "endo"})
         else:
-            events = client.ns_request(params={'q': 'happenings', 'filter': 'endo', 'view': f'region.{region}'})
+            events = client.ns_request(
+                params={"q": "happenings", "filter": "endo", "view": f"region.{region}"}
+            )
 
         nations = []
         for event in events:
-            endorser = re.search(r'[\w-]+(?=@@ en)', event['text'])
-            endorsee = re.search(r'[\w-]+(?=@@\.)', event['text'])
+            endorser = re.search(r"[\w-]+(?=@@ en)", event["text"])
+            endorsee = re.search(r"[\w-]+(?=@@\.)", event["text"])
 
             if endorser is not None and endorsee.group(0) == nation:
                 nations.append(endorser.group(0))
@@ -321,19 +353,21 @@ class NewWithdrawnEndorsements(Campaign):
     """
 
     def _search(self) -> list:
-        nation = self.search_params['nation']
-        region = self.search_params['region']
+        nation = self.search_params["nation"]
+        region = self.search_params["region"]
         client = self.handler
 
         if region is None:
-            events = client.ns_request(params={'q': 'happenings', 'filter': 'endo'})
+            events = client.ns_request(params={"q": "happenings", "filter": "endo"})
         else:
-            events = client.ns_request(params={'q': 'happenings', 'filter': 'endo', 'view': f'region.{region}'})
+            events = client.ns_request(
+                params={"q": "happenings", "filter": "endo", "view": f"region.{region}"}
+            )
 
         nations = []
         for event in events:
-            endorser = re.search(r'[\w-]+(?=@@ wi)', event['text'])
-            endorsee = re.search(r'[\w-]+(?=@@\.)', event['text'])
+            endorser = re.search(r"[\w-]+(?=@@ wi)", event["text"])
+            endorsee = re.search(r"[\w-]+(?=@@\.)", event["text"])
 
             if endorser is not None and endorsee.group(0) == nation:
                 nations.append(endorser.group(0))
@@ -346,16 +380,18 @@ class Endorsements(Campaign):
     Targets all nations currently endorsing a specific nation.
     """
 
-    def _post_init(self) -> None:
+    def post_init(self) -> None:
         self.one_time = True
 
         # no deque limit for this - endo lists can be huge
         self.deque = deque()
 
     def _search(self) -> list:
-        nation = self.search_params['nation']
+        nation = self.search_params["nation"]
         client = self.handler
-        return client.ns_request(params={'nation': nation, 'q': 'endorsements'})['ENDORSEMENTS'].split(',')
+        return client.ns_request(params={"nation": nation, "q": "endorsements"})[
+            "ENDORSEMENTS"
+        ].split(",")
 
 
 class WorldAssemblyDelegates(Campaign):
@@ -363,7 +399,7 @@ class WorldAssemblyDelegates(Campaign):
     Targets all World Assembly Delegates
     """
 
-    def _post_init(self) -> None:
+    def post_init(self) -> None:
         self.one_time = True
 
         # no deque limit for this - there are a lot of WADs
@@ -371,7 +407,7 @@ class WorldAssemblyDelegates(Campaign):
 
     def _search(self) -> list:
         client = self.handler
-        return client.ns_request(params={'wa': '1', 'q': 'delegates'})['delegates']
+        return client.ns_request(params={"wa": "1", "q": "delegates"})["delegates"]
 
 
 class WorldAssemblyMembers(Campaign):
@@ -379,11 +415,11 @@ class WorldAssemblyMembers(Campaign):
     Targets all World Assembly members
     """
 
-    def _post_init(self) -> None:
+    def post_init(self) -> None:
         self.one_time = True
         # no deque limit for this - there are a lot of WA members
         self.deque = deque()
 
     def _search(self) -> list:
         client = self.handler
-        return client.ns_request(params={'wa': '1', 'q': 'members'})['members']
+        return client.ns_request(params={"wa": "1", "q": "members"})["members"]

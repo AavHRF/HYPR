@@ -12,7 +12,7 @@ def founded(client: wrapper.Client) -> list:
     :param client: initialized client object that can be used to make API queries.
     :return: list of nation names
     """
-    return client.ns_request(params={'q': 'newnations'})['newnations']
+    return client.ns_request(params={"q": "newnations"})["newnations"]
 
 
 def residents(client: wrapper.Client, region: str) -> list:
@@ -23,7 +23,9 @@ def residents(client: wrapper.Client, region: str) -> list:
     :param region: name of region
     :return: list of nation names
     """
-    return client.ns_request(params={'region': region, 'q': 'nations'})['NATIONS'].split(':')
+    return client.ns_request(params={"region": region, "q": "nations"})[
+        "NATIONS"
+    ].split(":")
 
 
 def ejects(client: wrapper.Client, region: str = None) -> list:
@@ -36,13 +38,15 @@ def ejects(client: wrapper.Client, region: str = None) -> list:
     """
 
     if region is None:
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'eject'})
+        events = client.ns_request(params={"q": "happenings", "filter": "eject"})
     else:
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'eject', 'view': f'region.{region}'})
+        events = client.ns_request(
+            params={"q": "happenings", "filter": "eject", "view": f"region.{region}"}
+        )
 
     nations = []
     for event in events:
-        nations.append(re.search(r'[\w-]+(?=@@ was)', event['text']).group(0))
+        nations.append(re.search(r"[\w-]+(?=@@ was)", event["text"]).group(0))
 
     return nations
 
@@ -56,14 +60,16 @@ def exits(client: wrapper.Client, region: str) -> list:
     :return: list of nation names
     """
 
-    events = client.ns_request(params={'q': 'happenings', 'filter': 'move', 'view': f'region.{region}'})
+    events = client.ns_request(
+        params={"q": "happenings", "filter": "move", "view": f"region.{region}"}
+    )
 
     nations = []
     for event in events:
-        destination = re.search(r'[\w-]+(?=%%\.)', event['text']).group(0)
-        source = re.search(r'[\w-]+(?=%% to)', event['text']).group(0)
+        destination = re.search(r"[\w-]+(?=%%\.)", event["text"]).group(0)
+        source = re.search(r"[\w-]+(?=%% to)", event["text"]).group(0)
         if source == region and destination != "the_rejected_realms":
-            nations.append(re.search(r'[\w-]+(?=@@ relo)', event['text']).group(0))
+            nations.append(re.search(r"[\w-]+(?=@@ relo)", event["text"]).group(0))
 
     return nations
 
@@ -77,13 +83,15 @@ def entrances(client: wrapper.Client, region: str) -> list:
     :return: list of nation names
     """
 
-    events = client.ns_request(params={'q': 'happenings', 'filter': 'move', 'view': f'region.{region}'})
+    events = client.ns_request(
+        params={"q": "happenings", "filter": "move", "view": f"region.{region}"}
+    )
 
     nations = []
     for event in events:
-        destination = re.search(r'[\w-]+(?=%%\.)', event['text']).group(0)
+        destination = re.search(r"[\w-]+(?=%%\.)", event["text"]).group(0)
         if destination == region:
-            nations.append(re.search(r'[\w-]+(?=@@ relo)', event['text']).group(0))
+            nations.append(re.search(r"[\w-]+(?=@@ relo)", event["text"]).group(0))
 
     return nations
 
@@ -96,13 +104,15 @@ def wa_join(client: wrapper.Client, region=None) -> list:
     :return: list of nation names
     """
     if region is None:
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'member'})
+        events = client.ns_request(params={"q": "happenings", "filter": "member"})
     else:
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'member', 'view': f'region.{region}'})
+        events = client.ns_request(
+            params={"q": "happenings", "filter": "member", "view": f"region.{region}"}
+        )
 
     nations = []
     for event in events:
-        check = re.search(r'[\w-]+(?=@@ was admitted)', event['text'])
+        check = re.search(r"[\w-]+(?=@@ was admitted)", event["text"])
         if check is not None:
             nations.append(check.group(0))
 
@@ -119,13 +129,15 @@ def wa_resign(client: wrapper.Client, region: str = None) -> list:
     """
 
     if region is None:
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'member'})
+        events = client.ns_request(params={"q": "happenings", "filter": "member"})
     else:
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'member', 'view': f'region.{region}'})
+        events = client.ns_request(
+            params={"q": "happenings", "filter": "member", "view": f"region.{region}"}
+        )
 
     nations = []
     for event in events:
-        check = re.search(r'[\w-]+(?=@@ resigned)', event['text'])
+        check = re.search(r"[\w-]+(?=@@ resigned)", event["text"])
         if check is not None:
             nations.append(check.group(0))
 
@@ -142,14 +154,16 @@ def wa_endorse(client: wrapper.Client, nation: str, region: str = None) -> list:
     :return: list of nation names
     """
     if region is None:
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'endo'})
+        events = client.ns_request(params={"q": "happenings", "filter": "endo"})
     else:
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'endo', 'view': f'region.{region}'})
+        events = client.ns_request(
+            params={"q": "happenings", "filter": "endo", "view": f"region.{region}"}
+        )
 
     nations = []
     for event in events:
-        endorser = re.search(r'[\w-]+(?=@@ en)', event['text'])
-        endorsee = re.search(r'[\w-]+(?=@@\.)', event['text'])
+        endorser = re.search(r"[\w-]+(?=@@ en)", event["text"])
+        endorsee = re.search(r"[\w-]+(?=@@\.)", event["text"])
 
         if endorser is not None and endorsee.group(0) == nation:
             nations.append(endorser.group(0))
@@ -167,14 +181,16 @@ def wa_unendorse(client: wrapper.Client, nation: str, region: str = None) -> lis
     :return: list of nation names
     """
     if region is None:
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'endo'})
+        events = client.ns_request(params={"q": "happenings", "filter": "endo"})
     else:
-        events = client.ns_request(params={'q': 'happenings', 'filter': 'endo', 'view': f'region.{region}'})
+        events = client.ns_request(
+            params={"q": "happenings", "filter": "endo", "view": f"region.{region}"}
+        )
 
     nations = []
     for event in events:
-        endorser = re.search(r'[\w-]+(?=@@ wi)', event['text'])
-        endorsee = re.search(r'[\w-]+(?=@@\.)', event['text'])
+        endorser = re.search(r"[\w-]+(?=@@ wi)", event["text"])
+        endorsee = re.search(r"[\w-]+(?=@@\.)", event["text"])
 
         if endorser is not None and endorsee.group(0) == nation:
             nations.append(endorser.group(0))
@@ -189,7 +205,9 @@ def endorsements(client: wrapper.Client, nation: str) -> list:
     :param nation: name of nation to check for endorsements
     :return: list of nation names
     """
-    return client.ns_request(params={'nation': nation, 'q': 'endorsements'})['ENDORSEMENTS'].split(',')
+    return client.ns_request(params={"nation": nation, "q": "endorsements"})[
+        "ENDORSEMENTS"
+    ].split(",")
 
 
 def wa_delegates(client: wrapper.Client) -> list:
@@ -198,7 +216,7 @@ def wa_delegates(client: wrapper.Client) -> list:
     :param client: initialized client object that can be used to make API queries.
     :return: list of nation names
     """
-    return client.ns_request(params={'wa': '1', 'q': 'delegates'})['delegates']
+    return client.ns_request(params={"wa": "1", "q": "delegates"})["delegates"]
 
 
 def wa_members(client: wrapper.Client) -> list:
@@ -207,4 +225,4 @@ def wa_members(client: wrapper.Client) -> list:
     :param client: initialized client object that can be used to make API queries.
     :return: list of nation names
     """
-    return client.ns_request(params={'wa': '1', 'q': 'members'})['members']
+    return client.ns_request(params={"wa": "1", "q": "members"})["members"]

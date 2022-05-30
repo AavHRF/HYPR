@@ -2,9 +2,10 @@ from colorama import init
 from os import path
 from webbrowser import open as open_url
 from api import Client
-from tools import cout, menu, clear
+from tools import Console, Scheduler
 from time import sleep
 from typing import Tuple
+import logging
 
 
 def load_config() -> dict:
@@ -31,7 +32,7 @@ def load_config() -> dict:
         raise FileNotFoundError
 
 
-def verify_prompt() -> Tuple[str, str]:
+def verify_prompt(c: Console) -> Tuple[str, str]:
     """
     Spawns a verification prompt to confirm the user's identity
     Returns the nation and the token that they input
@@ -41,65 +42,90 @@ def verify_prompt() -> Tuple[str, str]:
     instead of multiple prompt copy-pastes.
     :return: tuple(str, str)
     """
-    cout("HYPR requires that you verify your identity before continuing.", "info")
-    nt = input(
-        "Please enter your nation. Do not include the pretitle (e.g. 'The Republic of'): "
-    ).strip(" ").lower().replace(" ", "_")
-    cout("Now opening the NationStates Login Verification page...", "info")
-    cout("Please log into the nation, and copy the verification code.", "info")
-    cout("Once you have copied the verification code, paste it below.", "info")
+
+    # Declare our console
+    c.cout("HYPR requires that you verify your identity before continuing.", "info")
+    nt = (
+        input(
+            "Please enter your nation. Do not include the pretitle (e.g. 'The Republic of'): "
+        )
+        .strip(" ")
+        .lower()
+        .replace(" ", "_")
+    )
+    c.cout("Now opening the NationStates Login Verification page...", "info")
+    c.cout("Please log into the nation, and copy the verification code.", "info")
+    c.cout("Once you have copied the verification code, paste it below.", "info")
     open_url(f"https://nationstates.net/page=verify_login?nation={nt}")
     tk = input().strip(" ")
-    cout("Now verifying your identity...", "info")
+    c.cout("Now verifying your identity...", "info")
     return nt, tk
 
 
-if __name__ == "__main__":
-    init() # Colorama init, don't remove or stuff Will Break™
-    cout("HYPR is starting up...", "info")
-    cout("Loading config...", "debug")
-
+def main() -> None:
+    init()  # Colorama init, don't remove or stuff Will Break™
+    # Declare the logger
+    logger = logging.getLogger("HYPR")
+    logger.setLevel(logging.DEBUG)
+    # Declare the console
+    c = Console(logger)
+    # Start our scheduler
+    sched = Scheduler()
+    sched.run()
+    c.cout("HYPR is starting up...", "info")
+    c.cout("Loading config...", "debug")
     # Load the config file.
     try:
         config = load_config()
     except FileNotFoundError:
-        cout("The configuration file does not appear to contain a valid configuration.\nA new config file will be "
-             "created in the working directory.\nPlease edit it, and then restart the program.", "fatal")
-
-    cout("Config loaded.", "debug")
-    nation, token = verify_prompt()
+        c.cout(
+            "The configuration file does not appear to contain a valid configuration.\nA new config file will be "
+            "created in the working directory.\nPlease edit it, and then restart the program.",
+            "fatal",
+        )
+    c.cout("Config loaded.", "debug")
+    nation, token = verify_prompt(c)
     # noinspection PyUnboundLocalVariable
-    ua_string = f"HYPR // v{config['version']} // Developed by https://github.com/AavHRF // In use by {nation} " \
-                f"(Unverified). // Should there be serious concerns about the operation of this program, please " \
-                f"open an issue at https://github.com/AavHRF/HYPR/issues."
+    ua_string = (
+        f"HYPR // v{config['version']} // Developed by https://github.com/AavHRF // In use by {nation} "
+        f"(Unverified). // Should there be serious concerns about the operation of this program, please "
+        f"open an issue at https://github.com/AavHRF/HYPR/issues."
+    )
     api = Client(ua_string)
     response = api.ns_request({"a": "verify", "nation": nation, "checksum": token})
-
     # Confirm the response.
     while True:
         if response["verified"]:
             # The nation is verified. Modify the user agent to reflect this, and then break out of the loop.
-            cout(f"Succesfully verified {nation}.", "info")
-            ua_string = f"HYPR // v{config['version']} // Developed by https://github.com/AavHRF // In use by {nation} " \
-                        f"(Verified). // Should there be serious concerns about the operation of this program, please " \
-                        f"open an issue at https://github.com/AavHRF/HYPR/issues."
+            c.cout(f"Succesfully verified {nation}.", "info")
+            ua_string = (
+                f"HYPR // v{config['version']} // Developed by https://github.com/AavHRF // In use by {nation} "
+                f"(Verified). // Should there be serious concerns about the operation of this program, please "
+                f"open an issue at https://github.com/AavHRF/HYPR/issues."
+            )
             api.headers = {"User-Agent": ua_string}
             break
         else:
             # The nation is not verified. Prompt the user to try again so we can confirm their identity.
-            cout("Verification failed. Please try again.", "warn")
+            c.cout("Verification failed. Please try again.", "warn")
             nation, token = verify_prompt()
-            response = api.ns_request({"a": "verify", "nation": nation, "checksum": token})
-
+            response = api.ns_request(
+                {"a": "verify", "nation": nation, "checksum": token}
+            )
     # Load the menu.
-    cout("Loading menu...", "debug")
+    c.cout("Loading menu...", "debug")
     sleep(1)
-    clear()
+    c.clear()
     options = [
         "Enable/Disable a campaign",
         "Add a region to offensive targeting",
         "Set home region",
         "Set telegram",
         "Set API key",
+        "Start API",
     ]
-    selected = menu("Main Menu", options)
+    selected = c.menu("Main Menu", options)
+
+
+if __name__ == "__main__":
+    main()

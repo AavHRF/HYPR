@@ -7,7 +7,6 @@ API_BASE_URL = "https://nationstates.net/cgi-bin/api.cgi"
 
 
 class Client:
-
     @property
     def requests_made(self) -> int:
         return self._requests_made
@@ -65,11 +64,20 @@ class Client:
             self.requests_made += 1
             # Authentication errors
             if r.status_code == 403:
-                return {"error": "403", "ratelimit": r.headers["X-Ratelimit-requests-seen"]}
+                return {
+                    "error": "403",
+                    "ratelimit": r.headers["X-Ratelimit-requests-seen"],
+                }
             if r.status_code == 409:
-                return {"error": "409", "ratelimit": r.headers["X-Ratelimit-requests-seen"]}
+                return {
+                    "error": "409",
+                    "ratelimit": r.headers["X-Ratelimit-requests-seen"],
+                }
             if r.status_code == 429:
-                return {"error": "429", "ratelimit": r.headers["X-Ratelimit-requests-seen"]}
+                return {
+                    "error": "429",
+                    "ratelimit": r.headers["X-Ratelimit-requests-seen"],
+                }
 
             # Server errors
             if r.status_code == 500:
@@ -89,7 +97,10 @@ class Client:
         try:
             root = ElementTree.fromstring(r.text)
         except ElementTree.ParseError:  # Malformed XML response guard
-            return {"error": "ParseError", "ratelimit": r.headers["X-Ratelimit-requests-seen"]}
+            return {
+                "error": "ParseError",
+                "ratelimit": r.headers["X-Ratelimit-requests-seen"],
+            }
 
         # Check through our params to figure out what we're looking for
         if "nation" in params.keys():
@@ -131,7 +142,9 @@ class Client:
                     event_id = event.attrib["id"]
                     timestamp = event.find("TIMESTAMP").text
                     text = event.find("TEXT").text
-                    vals.append({"event_id": event_id, "timestamp": timestamp, "text": text})
+                    vals.append(
+                        {"event_id": event_id, "timestamp": timestamp, "text": text}
+                    )
                 return vals
 
             if "newnations" in params.values():
