@@ -34,13 +34,13 @@ class Campaign:
         :param search_params: Parameters for search.
         """
 
-        self.name = name
-        self.priority = priority
-        self.tgid = tgid
-        self.recruitment = recruitment
+        self._name = name
+        self._priority = priority
+        self._tgid = tgid
+        self._recruitment = recruitment
         self.handler = handler
         self.search_params = search_params
-        self.last_search = 0
+        self._last_search = 0
 
         # create deque, with maximum length if necessary
         self.deque = deque(maxlen=480)
@@ -110,6 +110,7 @@ class Campaign:
         self.deque.clear()
         self.update_deque()
 
+    @property
     def nation(self) -> str:
         """
         Return next nation to be telegrammed and remove from deque.
@@ -123,6 +124,7 @@ class Campaign:
         else:
             return self.deque.pop()[0]
 
+    @property
     def tgid(self) -> int:
         """
         Return TGID for campaign.
@@ -130,8 +132,9 @@ class Campaign:
         :return: tgid
         """
 
-        return self.tgid
+        return self._tgid
 
+    @property
     def priority(self) -> int:
         """
         Return campaign priority
@@ -139,15 +142,17 @@ class Campaign:
         :return: priority
         """
 
-        return self.priority
+        return self._priority
 
+    @property
     def name(self) -> str:
         """
         Return campaign name
         :return: name
         """
-        return self.name
+        return self._name
 
+    @property
     def is_recruitment(self) -> bool:
         """
         Return recruitment type. You must set this yourself correctly for proper ratelimiting!
@@ -155,15 +160,20 @@ class Campaign:
         :return: True if campaign is recruitment
         """
 
-        return self.recruitment
+        return self._recruitment
 
+    @property
     def last_search(self) -> int:
         """
         Return time the deque was last updated, in Unix time
         :return: last search time in seconds since epoch
         """
 
-        return self.last_search
+        return self._last_search
+
+    @last_search.setter
+    def last_search(self, value):
+        self._last_search = value
 
 
 # subclasses for key scenarios
