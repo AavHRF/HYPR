@@ -1,3 +1,4 @@
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 # HYPR
 High performance API recruitment software for NationStates written in Python
 
@@ -12,3 +13,6 @@ with your own filters (called [Campaigns](docs/campaigns.md)).
 - [ ] Runs in the background, no need to keep a window open
 - [x] Cross-platform - run on Windows, Linux, or MacOS
 - [ ] Weighted bin targeting methods - rank your targets in order of preference
+
+# Contributing
+Make a PR, before you commit run `pre_commit.sh` to ensure that the files get formatted properly.

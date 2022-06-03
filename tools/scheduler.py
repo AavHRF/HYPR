@@ -5,7 +5,13 @@ from typing import Callable, List
 
 class Task:
     def __init__(
-        self, priority: int, tasktype: str, cycle_length: int, function: Callable, *args, **kwargs
+        self,
+        priority: int,
+        tasktype: str,
+        cycle_length: int,
+        function: Callable,
+        *args,
+        **kwargs
     ):
         self.priority = priority
         self.cycle_length = cycle_length
@@ -17,7 +23,13 @@ class Task:
 
     @classmethod
     def new(
-        cls, priority: int, tasktype: str, cycle_length: int, function: Callable, *args, **kwargs
+        cls,
+        priority: int,
+        tasktype: str,
+        cycle_length: int,
+        function: Callable,
+        *args,
+        **kwargs
     ) -> "Task":
         return cls(priority, tasktype, cycle_length, function, *args, **kwargs)
 
@@ -25,8 +37,8 @@ class Task:
     def run_when(self) -> int:
         return self.init_time + self.cycle_length
 
-class Scheduler:
 
+class Scheduler:
     def __init__(self):
         self.tasks: List[Task] = []
         self.organize()
@@ -107,7 +119,10 @@ class Scheduler:
                         t.start()
                 else:
                     # Spawn a background thread to run the task, and then wait for the next task to be due
-                    t = threading.Thread(target=run_task, args=(self.tasks[0], self.tasks[0].run_when - int(time.time())))
+                    t = threading.Thread(
+                        target=run_task,
+                        args=(self.tasks[0], self.tasks[0].run_when - int(time.time())),
+                    )
                     t.start()
                     # Remove the task that we just ran from the queue
                     self.tasks.pop(0)

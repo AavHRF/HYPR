@@ -30,6 +30,7 @@ class Console:
         clear() -> None
             Clears the console.
     """
+
     def __init__(self, logger):
         self.logger: logging.Logger = logger
 

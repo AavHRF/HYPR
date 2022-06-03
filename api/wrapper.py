@@ -25,8 +25,6 @@ class Client:
 
     def __init__(self, useragent: str):
         """
-        API Client constructor
-
         Functions of the API client:
         ns_request - Makes a request to the NationStates API, and parses the response from XML to JSON
 
