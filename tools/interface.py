@@ -81,7 +81,9 @@ class Console:
         """
         while True:
             u = input(f"{Fore.GREEN}[INPUT]{Style.RESET_ALL} {prompt} ")
-            if u.lower() in [option.lower() for option in options]:
+            if u.lower().replace(" ", "_") in [
+                option.lower().replace(" ", "_") for option in options
+            ]:
                 return u
             else:
                 print(
