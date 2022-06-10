@@ -281,7 +281,10 @@ class WorldAssemblyAdmissions(Campaign):
     """
 
     def _search(self) -> list:
-        region = self.search_params["region"]
+        try:
+            region = self.search_params["region"]
+        except KeyError:
+            region = None
         client = self.handler
 
         if region is None:
@@ -306,7 +309,10 @@ class WorldAssemblyAdmissions(Campaign):
 
 class WorldAssemblyResignations(Campaign):
     def _search(self) -> list:
-        region = self.search_params["region"]
+        try:
+            region = self.search_params["region"]
+        except KeyError:
+            region = None
         client = self.handler
 
         if region is None:
@@ -335,16 +341,15 @@ class NewEndorsements(Campaign):
     """
 
     def _search(self) -> list:
+        # TODO automatically determine target's region
         nation = self.search_params["nation"]
         region = self.search_params["region"]
+
         client = self.handler
 
-        if region is None:
-            events = client.ns_request(params={"q": "happenings", "filter": "endo"})
-        else:
-            events = client.ns_request(
-                params={"q": "happenings", "filter": "endo", "view": f"region.{region}"}
-            )
+        events = client.ns_request(
+            params={"q": "happenings", "filter": "endo", "view": f"region.{region}"}
+        )
 
         nations = []
         for event in events:
@@ -359,20 +364,20 @@ class NewEndorsements(Campaign):
 
 class NewWithdrawnEndorsements(Campaign):
     """
-    Targets nations recently withdrawing an endorsement of a specific nation.
+    Targets nations recently withdrawing an endorsement of a specific nation. Withdrawn endorsements happen relatively
+    infrequently compared to endorsements, so this campaign may struggle to catch withdrawn endorsements unless
+    endorsements are stagnant.
     """
 
     def _search(self) -> list:
+        # TODO automatically determine nation's region
         nation = self.search_params["nation"]
         region = self.search_params["region"]
         client = self.handler
 
-        if region is None:
-            events = client.ns_request(params={"q": "happenings", "filter": "endo"})
-        else:
-            events = client.ns_request(
-                params={"q": "happenings", "filter": "endo", "view": f"region.{region}"}
-            )
+        events = client.ns_request(
+            params={"q": "happenings", "filter": "endo", "view": f"region.{region}"}
+        )
 
         nations = []
         for event in events:
