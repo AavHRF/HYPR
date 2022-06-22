@@ -1,9 +1,16 @@
 import requests
-from typing import List
+from typing import List, Optional
 from requests.exceptions import HTTPError
 from xml.etree import ElementTree
+from api import NSLeakyBucket
 
-API_BASE_URL = "https://nationstates.net/cgi-bin/api.cgi"
+
+# Globaled ratelimiter and constant API url
+# Yes, it's probably bad practice. No, it doesn't matter.
+# It's just one file, one scope, and they aren't imported in __init__.py
+# It's fine.
+API_BASE_URL = "https://www.nationstates.net/cgi-bin/api.cgi"
+bucket = NSLeakyBucket()
 
 
 class Client:
@@ -23,6 +30,14 @@ class Client:
     def headers(self, value: dict) -> None:
         self._headers = value
 
+    @property
+    def key(self) -> Optional[str]:
+        return self._key if self._key else None
+
+    @key.setter
+    def key(self, value: str) -> None:
+        self._key = value
+
     def __init__(self, useragent: str):
         """
         Functions of the API client:
@@ -31,6 +46,7 @@ class Client:
         Properties of the class:
         requests_made - The number of requests made to the API
         headers - The headers to send with each request
+        key - The NS API client key to use with telegram requests
 
         Both of the above have setters, so they can be modified mid-run should that become necessary.
 
@@ -41,11 +57,22 @@ class Client:
         some work to hopefully remove this, but it's low-priority for now. If you're reading this and aren't a maintainer,
         but it bugs you, PR a change! We're open source for a reason!
 
+        Update 6/20/2022: I am tempted to deprecate requests_made as NSLeakyBucket is now a class and handles the
+        ratelimiting. Additionally, added the API client key as a getter/setter in this class to enable telegram
+        sending.
+
+        The key is set to None but can be modified via calling the setter. This enables a clean constructor
+        that only takes a useragent in the case that you aren't sending telegrams during a run, but if you are, you can
+        set the key via the config file, load it in, and then it will auto-set enabling telegrams. Otherwise, it will
+        raise an exception telling you that there is no key.
+
         :param useragent: An identifying string for the client
         """
         self._headers = {"User-Agent": useragent}
         self._requests_made = 0
+        self._key = None
 
+    @bucket
     def ns_request(self, params: dict) -> dict | List[dict]:
         """
         Wrapper to make NS requests less shitty to work with
@@ -180,5 +207,12 @@ class Client:
                 # This is a single tag with a list of CSV formatted nations
                 return {
                     "members": root.find("MEMBERS").text.split(","),
+                    "ratelimit": r.headers["X-Ratelimit-requests-seen"],
+                }
+
+            if "sendtg" in params.values():
+                # Returns true if the telegram was sent successfully, false otherwise
+                return {
+                    "queued": True if int(r.text) == 1 else False,
                     "ratelimit": r.headers["X-Ratelimit-requests-seen"],
                 }

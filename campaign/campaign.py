@@ -21,6 +21,7 @@ class Campaign:
         name: str,
         priority: int,
         tgid: int,
+        secret_key: str,
         recruitment: bool,
         handler: api.wrapper.Client,
         search_params: dict,
@@ -37,6 +38,7 @@ class Campaign:
         self._name = name
         self._priority = priority
         self._tgid = tgid
+        self._secret = secret_key
         self._recruitment = recruitment
         self.handler = handler
         self.search_params = search_params
@@ -133,6 +135,16 @@ class Campaign:
         """
 
         return self._tgid
+
+    @property
+    def secret_key(self) -> str:
+        """
+        Return secret key for campaign.
+
+        :return: secret key
+        """
+
+        return self._secret
 
     @property
     def priority(self) -> int:
