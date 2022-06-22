@@ -2,6 +2,7 @@ from colorama import init
 from os import path
 from webbrowser import open as open_url
 from api import Client
+from campaign import Campaign
 from tools import Console, Scheduler
 from time import sleep
 from typing import Tuple
@@ -62,6 +63,34 @@ def verify_prompt(c: Console) -> Tuple[str, str]:
     return nt, tk
 
 
+def send_recruitment(api: Client, campaign: Campaign, c: Console) -> None:
+    """
+    Uses the campaign targeting functionality to provide options for targeting, then schedules the appropriate
+    recruitment request.
+    :param api:
+    :param campaign:
+    :return:
+    """
+
+    if api.key:
+        # Fetch a nation to target from the campaign
+        target = campaign.nation
+        params = {
+            "a": "sendTG",
+            "client": api.key,
+            "tgid": campaign.tgid,
+            "key": campaign.secret_key,
+            "to": target,
+        }
+        # Send the recruitment request
+        resp = api.ns_request(params)
+    else:
+        c.cout(
+            "No valid API key provided. Please add one to the config file and reload the client.",
+            "error",
+        )
+
+
 def main() -> None:
     init()  # Colorama init, don't remove or stuff Will Break™
     # Declare the logger
@@ -108,12 +137,12 @@ def main() -> None:
         else:
             # The nation is not verified. Prompt the user to try again so we can confirm their identity.
             c.cout("Verification failed. Please try again.", "warn")
-            nation, token = verify_prompt()
+            nation, token = verify_prompt(c)
             response = api.ns_request(
                 {"a": "verify", "nation": nation, "checksum": token}
             )
     # Load the menu.
-    c.cout("Loading menu...", "debug")
+    c.cout("Loading main menu...", "debug")
     sleep(1)
     c.clear()
     options = [
@@ -125,6 +154,26 @@ def main() -> None:
         "Start API",
     ]
     selected = c.menu("Main Menu", options)
+    match selected:
+
+        case 0:
+            # Enable/Disable a campaign
+            c.cout("Loading campaign menu...", "debug")
+        case 1:
+            # Add a region to offensive targeting
+            c.cout("Loading region targeting menu...", "debug")
+        case 2:
+            # Set home region
+            c.cout("Loading home region menu...", "debug")
+        case 3:
+            # Set telegram
+            c.cout("Loading telegram menu...", "debug")
+        case 4:
+            # Set API key
+            c.cout("Loading API key menu...", "debug")
+        case 5:
+            # Start API
+            c.cout("Loading API...", "debug")
 
 
 if __name__ == "__main__":

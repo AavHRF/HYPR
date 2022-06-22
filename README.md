@@ -9,10 +9,13 @@ open-source context. It features advanced targeting features, and allows you to 
 with your own filters (called [Campaigns](docs/campaigns.md)).
 
 # Features
-- [x] 100% API compliance at all times - fails safe, not open
+- [ ] 100% API compliance at all times - fails safe, not open
 - [ ] Runs in the background, no need to keep a window open
 - [x] Cross-platform - run on Windows, Linux, or MacOS
 - [ ] Weighted bin targeting methods - rank your targets in order of preference
 
 # Contributing
 Make a PR, before you commit run `pre_commit.sh` to ensure that the files get formatted properly.
+We use [black](https://black.readthedocs.io/en/stable/) to format the code. Please make sure your dev environment
+is configured as such. Additionally, we build in Python 3.10 in order to support match case statements. You cannot
+use any older versions of Python, as they will fail.
