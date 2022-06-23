@@ -30,6 +30,7 @@ class Campaign:
         :param name: Campaign name
         :param priority: Campaign priority
         :param tgid: TGID assigned to campaign
+        :param secret_key: Secret key for sender region
         :param recruitment: True if campaign is recruitment, used to help schedule appropriately
         :param handler: api.wrapper.Client instance for accessing NS API safely
         :param search_params: Parameters for search.
