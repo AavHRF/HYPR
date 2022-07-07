@@ -19,3 +19,7 @@ Make a PR, before you commit run `pre_commit.sh` to ensure that the files get fo
 We use [black](https://black.readthedocs.io/en/stable/) to format the code. Please make sure your dev environment
 is configured as such. Additionally, we build in Python 3.10 in order to support match case statements. You cannot
 use any older versions of Python, as they will fail.
+
+# Documentation
+We maintain a [documentation repository](docs) that you can look through to find developer-designed documentation.
+Additionally, this readme will contain instructions on how to run HYPR on your machine once it has entered beta.
