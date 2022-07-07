@@ -83,19 +83,29 @@ class Scheduler:
             if delay > 0:
                 time.sleep(delay)
 
-            with global_api_lock:
-                if task.type == "recruitment":
-                    with global_telegram_lock:
-                        with global_recruitment_lock:
+            global_api_lock.acquire()
+            if task.type == "recruitment":
+                with global_telegram_lock:
+                    with global_recruitment_lock:
+                        try:
                             task.function(*task.args, **task.kwargs)
-                            time.sleep(task.cycle_length)
-                elif task.type == "telegram":
-                    with global_telegram_lock:
-                        task.function(*task.args, **task.kwargs)
+                        except Exception as e:
+                            print(e)
+                            global_api_lock.release()
+                        global_api_lock.release()
                         time.sleep(task.cycle_length)
-                else:
-                    task.function(*task.args, **task.kwargs)
+            elif task.type == "telegram":
+                with global_telegram_lock:
+                    try:
+                        task.function(*task.args, **task.kwargs)
+                    except Exception as e:
+                        print(e)
+                        global_api_lock.release()
+                    global_api_lock.release()
                     time.sleep(task.cycle_length)
+            else:
+                task.function(*task.args, **task.kwargs)
+                time.sleep(task.cycle_length)
             return
 
         while self.continue_running:
