@@ -124,6 +124,9 @@ def main() -> None:
     response = api.ns_request({"a": "verify", "nation": nation, "checksum": token})
     # Confirm the response.
     while True:
+        # This is in a while loop to serve as a guard until verification has been completed.
+        # It is impossible to progress past this portion without verification, ergo, the nation
+        # is in fact owned by the user.
         if response["verified"]:
             # The nation is verified. Modify the user agent to reflect this, and then break out of the loop.
             c.cout(f"Succesfully verified {nation}.", "info")
@@ -155,7 +158,6 @@ def main() -> None:
     ]
     selected = c.menu("Main Menu", options)
     match selected:
-
         case 0:
             # Enable/Disable a campaign
             c.cout("Loading campaign menu...", "debug")
@@ -171,6 +173,7 @@ def main() -> None:
         case 4:
             # Set API key
             c.cout("Loading API key menu...", "debug")
+            api.key = c.cin("Please enter your API key:")
         case 5:
             # Start API
             c.cout("Loading API...", "debug")

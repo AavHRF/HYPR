@@ -2,6 +2,7 @@ import time
 import api.wrapper
 import re
 from collections import deque
+from exceptions import SearchException
 
 
 # How this works
@@ -27,6 +28,8 @@ class Campaign:
         search_params: dict,
     ):
         """
+        A meta-object for the instantiation of a campaign.
+
         :param name: Campaign name
         :param priority: Campaign priority
         :param tgid: TGID assigned to campaign
@@ -81,8 +84,7 @@ class Campaign:
                 else:
                     self.deque.extend(new_nations)
             else:
-                # TODO: should pass a log message warning that the deque is not being refreshed anymore.
-                pass
+                raise SearchException("One-time search already performed.")
         else:
             new_nations = self._search()
             self.last_search = time.time()

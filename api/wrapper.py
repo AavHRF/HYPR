@@ -10,7 +10,6 @@ from api import NSLeakyBucket
 # It's just one file, one scope, and they aren't imported in __init__.py
 # It's fine.
 API_BASE_URL = "https://www.nationstates.net/cgi-bin/api.cgi"
-bucket = NSLeakyBucket()
 
 
 class Client:
@@ -62,7 +61,7 @@ class Client:
         sending.
 
         The key is set to None but can be modified via calling the setter. This enables a clean constructor
-        that only takes a useragent in the case that you aren't sending telegrams during a run, but if you are, you can
+        that only takes an useragent in the case that you aren't sending telegrams during a run, but if you are, you can
         set the key via the config file, load it in, and then it will auto-set enabling telegrams. Otherwise, it will
         raise an exception telling you that there is no key.
 
@@ -72,7 +71,7 @@ class Client:
         self._requests_made = 0
         self._key = None
 
-    @bucket
+    @NSLeakyBucket
     def ns_request(self, params: dict) -> dict | List[dict]:
         """
         Wrapper to make NS requests less shitty to work with

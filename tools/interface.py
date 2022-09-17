@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from colorama import Fore, Style
 from os import system, name
 import logging
@@ -18,7 +18,7 @@ class Console:
             If the message is a fatal error, the program will exit.
 
         cin(prompt: str, options: List[str]) -> str
-            Prompts the user for input, and validates the input against a list of options.
+            Prompts the user for input, and validates the input against a list of options, or returns the input.
             Returns the user's input.
 
         menu(title: str, options: List[str]) -> int
@@ -70,7 +70,7 @@ class Console:
         return int(self.cin(f">", [str(i) for i in range(len(options))]))
 
     @staticmethod
-    def cin(prompt: str, options: List[str]) -> str:
+    def cin(prompt: str, options: Optional[List[str]] = None) -> str:
         """
         Handles user input validation and returns the user's choice.
         Note: The user's input is returned as-is, and is not sanitized in any way, including case.
@@ -79,16 +79,19 @@ class Console:
         :param options: List[str] A list of valid options.
         :return: str The user's choice.
         """
-        while True:
-            u = input(f"{Fore.GREEN}[INPUT]{Style.RESET_ALL} {prompt} ")
-            if u.lower().replace(" ", "_") in [
-                option.lower().replace(" ", "_") for option in options
-            ]:
-                return u
-            else:
-                print(
-                    f"{Fore.YELLOW}[WARN]{Style.RESET_ALL} Invalid input. Please try again."
-                )
+        if options is not None:
+            while True:
+                u = input(f"{Fore.GREEN}[INPUT]{Style.RESET_ALL} {prompt} ")
+                if u.lower().replace(" ", "_") in [
+                    option.lower().replace(" ", "_") for option in options
+                ]:
+                    return u
+                else:
+                    print(
+                        f"{Fore.YELLOW}[WARN]{Style.RESET_ALL} Invalid input. Please try again."
+                    )
+        else:
+            return input(f"{Fore.GREEN}[INPUT]{Style.RESET_ALL} {prompt} ")
 
     @staticmethod
     def clear() -> None:
@@ -99,3 +102,15 @@ class Console:
             _ = system("cls")
         else:
             _ = system("clear")
+
+    @staticmethod
+    def invoke(command: str) -> None:
+        """
+        Invokes a command in the terminal.
+        Does not check platform type before execution.
+
+        :param command:
+        :return:
+        """
+        _ = system(command)
+        return None

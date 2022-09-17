@@ -1,12 +1,12 @@
 import time
 import threading
-from typing import Callable, List
+from typing import Callable, List, Literal
 
 
 class Task:
     def __init__(
         self,
-        priority: int,
+        priority: Literal[1, 2, 3, 4, 5],
         tasktype: str,
         cycle_length: int,
         function: Callable,
@@ -24,13 +24,15 @@ class Task:
     @classmethod
     def new(
         cls,
-        priority: int,
+        priority: Literal[1, 2, 3, 4, 5],
         tasktype: str,
         cycle_length: int,
         function: Callable,
         *args,
         **kwargs
     ) -> "Task":
+        if priority not in [1, 2, 3, 4, 5]:
+            raise ValueError("Priority must be between 1 and 5")
         return cls(priority, tasktype, cycle_length, function, *args, **kwargs)
 
     @property
@@ -57,10 +59,22 @@ class Scheduler:
 
     def organize(self) -> None:
         """
-        Method to organize the tasks by time of execution.
+        Method to organize the tasks by time of execution, placing higher priority tasks first.
         :return:
         """
         self.tasks.sort(key=lambda task: task.run_when)
+        previous_task: Task = self.tasks[0]
+        for task in self.tasks[1:]:
+            if task.run_when == previous_task.run_when:
+                if task.priority < previous_task.priority:
+                    # Swap the tasks
+                    self.tasks[self.tasks.index(task)] = previous_task
+                    self.tasks[self.tasks.index(previous_task)] = task
+                    previous_task = task
+                else:
+                    self.tasks.remove(task)
+                    self.tasks.insert(0, task)
+                    previous_task = task
         return
 
     def run(self) -> None:
