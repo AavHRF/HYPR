@@ -1,0 +1,39 @@
+A "campaign" contains the settings, API calls, and logic necessary to deliver a list of targets. Campaigns need to comply with the master rate limit [expand later] and output to the bucket in the standard format [detail later].
+
+Output parameters are nation name, the associated TGID, whether or not this is a recruitment telegram, an expiry timestamp, and whether to send from newest or oldest additions [does bucket ID get passed up? assigned by the octopus on startup and passed down?]
+  -Semi-supports delayed delviery by default: have it work from oldest, and if necessary set an expiry. I.e. hit newnation from oldest entry, expiry 1 day.
+
+The overall concept is that a given campaign is narrow, and is cloned as needed. How narrow could be flexible - i.e. probably worth building a campaign that can target moves to multiple regions without needing to clone it for each region, but if you want to target nations with at least 5 endorsements, then you just clone the Residency one and change the stat + value brackets.
+
+Most all campaigns should include "only/not in region(s)" filtering options. Some would benefit from "only/not in WA." 
+  -Creating this has made me question whether we want to pass down a global region exclusion list, keep it on the level of each campaign, or join both (global master + specifics).
+
+Campaigns:
+All X
+  -These would be basic lists like "all nations in the [world, region, WA members, Delegates]" that just yank in an existing API call
+  -Should allow some basic exclusion/filtering universally: "Only in/not in region X, only in/not in WA" 
+    -I don't expect too many of these, but building in a couple to the baseline makes this a very versitile campaign with just settings changes.
+  -The WA members clone of this specifically should also be able to stack a filter for "all nations currently endorsing/not endorsing [nation(s)]" on top of the region filters
+  -This should have an exceedingly generous expiry, because you may be fine spending weeks working through these lists
+  -TBD: How these would not...over-run. If they re-pull frequently, they should only add changes, which would require tracking changes, and that's more of a different campaign. These are functional as a one-and-done, not sure how we'd set that up.
+
+Intermediate API Calls
+  -These are also based mostly on API calls, but not necessarily simple ones: newnations, but specifying refounds, ejections, etc requires a little more legwork (but well-established in other code bases). 
+  -WA joins/resigns COULD be done this way via the activity feed. As COULD moves to/exits from a region. And new Endorsements. And Delegates.
+  -Requires tracking your "last entry" into the next run, but not a larger list - you just need to know where you left off in a given call
+  -Should also include basic exlcusion/filtering, at least only/not in region. I think this'll become even more notable in the frontiers era, when allies may be under more pressure to not to newnations on allied frontiers.
+  -Advanced option for this would be an option for basic puppet avoidance, i.e. similar to the ruleset NS uses. Devi has some code for this concept.
+    -This advanced option could potentially be applied to other campaigns too.
+    
+Simple Change Tracking (a pseudo-category)
+  -This encompasses easy calls but the need to track changes between runs. Examples include the other approach to new WA joins/resigns (additions to Members), new nations that move to/exit from a region (changes to Nations), new endorsements (changes to Endorsements), new delegates (changes to Delegates), etc. Maybe new founders?
+  -This is just a different approach than doing these things via activity filters
+  -One upside to this approach is avoiding more short term and R&D activity with minimal work. Activity will show every delegate election, change tracking will just show net new delegates between runs.
+  -One downside is needing to account for CTEs and DEATs
+  
+Additional World Assembly Campaigning (a varient campaign)
+  -We've already covered messaging all delegates or all WA members. Advanced options to target only those voting one way or another on a specific res, or approving a specific res, would be nice as well. These are a bit more of a pain to parse. Rather than being advanced options, these should probably be varient clones of those simpler campaigns.
+  -We really should be building global options to specify or exclude a list of region into all of these.
+
+The Fancy Stuff
+  -Nation stats. Main use case that comes to mind is using residency to "close enough" the ability to target [all nations in this range] in order to do the historical "nations that have been in the region for 3/30 days" type of telegram with less work than change tracking over that time period. Framework, once existant, can easily be applied to other calls.
